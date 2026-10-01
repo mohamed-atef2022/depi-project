@@ -4,8 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/mohamed-atef2022/depi-project.git'
+                git 'https://github.com/mohamed-atef2022/depi-project.git'
             }
         }
 
@@ -21,6 +20,12 @@ pipeline {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
                     sh 'docker push mohamedatef2022/nginx-lab:$BUILD_NUMBER'
                 }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh ' yq -i  .spec.template.spec.containers[0].image="mohamedatef2022/nginx-lab:$BUILD_NUMBER" deployment.yaml'
+                sh 'kubectl apply -f deployment.yaml'
             }
         }
     }
